@@ -24,13 +24,22 @@ jobs:
           DATED_TAG=${UPSTREAM_DATED_TAG%-slim}
           echo ::set-env name=UPSTREAM_DATED_TAG::$UPSTREAM_DATED_TAG
           echo ::set-env name=DATED_TAG::$DATED_TAG
-      - name: Build and push image
+      - name: Build and push image to GitHub Packages
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
           password: ${{ github.token }}
           registry: docker.pkg.github.com
           repository: ${{ github.repository }}/arm64v8-rust-ffmpeg
+          build_args: UPSTREAM_TAG=${{ env.UPSTREAM_DATED_TAG }}
+          tags: ${{ env.DISTRIBUTION }},${{ env.DATED_TAG }}
+          push: ${{ github.ref == 'refs/heads/master' }}
+      - name: Build and push image to Docker hub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+          repository: zmwangx/arm64v8-rust-ffmpeg
           build_args: UPSTREAM_TAG=${{ env.UPSTREAM_DATED_TAG }}
           tags: ${{ env.DISTRIBUTION }},${{ env.DATED_TAG }}
           push: ${{ github.ref == 'refs/heads/master' }}
