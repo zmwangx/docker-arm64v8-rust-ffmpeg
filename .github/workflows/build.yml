@@ -1,0 +1,36 @@
+name: build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distribution: [buster, bullseye, unstable]
+    env:
+      DISTRIBUTION: ${{ matrix.distribution }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Enable arm64 emulation
+        run: |
+          set -x
+          docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+          cat /proc/sys/fs/binfmt_misc/qemu-aarch64
+      - name: Determine latest upstream tag
+        run: |
+          UPSTREAM_DATED_TAG=$(curl -s 'https://hub.docker.com/v2/repositories/arm64v8/debian/tags?page_size=100' | jq -r '.results[]|.name' | grep -P "$DISTRIBUTION-\d{8}-slim" | sort -r | head -1)
+          DATED_TAG=${UPSTREAM_DATED_TAG%-slim}
+          echo ::set-env name=UPSTREAM_DATED_TAG::$UPSTREAM_DATED_TAG
+          echo ::set-env name=DATED_TAG::$DATED_TAG
+      - name: Build and push image
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          registry: docker.pkg.github.com
+          repository: ${{ github.repository }}/arm64v8-rust-ffmpeg
+          build_args: UPSTREAM_TAG=${{ env.UPSTREAM_DATED_TAG }}
+          tags: ${{ env.DISTRIBUTION }},${{ env.DATED_TAG }}
+          push: ${{ github.ref == 'refs/heads/master' }}
