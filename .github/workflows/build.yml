@@ -17,8 +17,8 @@ jobs:
         run: |
           UPSTREAM_DATED_TAG=$(curl -s 'https://hub.docker.com/v2/repositories/arm64v8/debian/tags?page_size=100' | jq -r '.results[]|.name' | grep -P "$DISTRIBUTION-\d{8}-slim" | sort -r | head -1)
           DATED_TAG=${UPSTREAM_DATED_TAG%-slim}
-          echo name=UPSTREAM_DATED_TAG::$UPSTREAM_DATED_TAG >> "$GITHUB_ENV"
-          echo name=DATED_TAG::$DATED_TAG >> "$GITHUB_ENV"
+          echo UPSTREAM_DATED_TAG=$UPSTREAM_DATED_TAG >> "$GITHUB_ENV"
+          echo DATED_TAG=$DATED_TAG >> "$GITHUB_ENV"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
