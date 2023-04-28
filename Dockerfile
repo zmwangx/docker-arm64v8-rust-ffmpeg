@@ -14,7 +14,6 @@ RUN apt-get update && \
     libavdevice-dev \
     libavfilter-dev \
     libavformat-dev \
-    libavresample-dev \
     libavutil-dev \
     libpostproc-dev \
     libswresample-dev \
