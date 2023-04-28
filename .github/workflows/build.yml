@@ -22,8 +22,8 @@ jobs:
         run: |
           UPSTREAM_DATED_TAG=$(curl -s 'https://hub.docker.com/v2/repositories/arm64v8/debian/tags?page_size=100' | jq -r '.results[]|.name' | grep -P "$DISTRIBUTION-\d{8}-slim" | sort -r | head -1)
           DATED_TAG=${UPSTREAM_DATED_TAG%-slim}
-          echo ::set-env name=UPSTREAM_DATED_TAG::$UPSTREAM_DATED_TAG
-          echo ::set-env name=DATED_TAG::$DATED_TAG
+          echo name=UPSTREAM_DATED_TAG::$UPSTREAM_DATED_TAG >> "$GITHUB_ENV"
+          echo name=DATED_TAG::$DATED_TAG >> "$GITHUB_ENV"
       - name: Build and push image to GitHub Packages
         uses: docker/build-push-action@v1
         with:
